@@ -10,7 +10,11 @@ INPUT_FILE = BASE_DIR / "data" / "kafka_data.csv"
 
 KAFKA_SERVER = "localhost:9092"
 TOPIC = "patient-discharge"
-TEST_RECORDS = 5
+
+# Set to None to send the complete dataset.
+RECORD_LIMIT = 100
+
+PROGRESS_EVERY = 100
 
 
 def create_producer():
@@ -26,37 +30,41 @@ def create_producer():
 def main():
     producer = create_producer()
 
+    sent = 0
+
     print(f"Reading: {INPUT_FILE}")
-    print(f"Sending first {TEST_RECORDS} records to '{TOPIC}'")
+    print(f"Kafka server: {KAFKA_SERVER}")
+    print(f"Topic: {TOPIC}")
+    print(f"Record limit: {RECORD_LIMIT}")
 
-    with INPUT_FILE.open("r", encoding="utf-8", newline="") as file:
-        reader = csv.DictReader(file)
+    try:
+        with INPUT_FILE.open("r", encoding="utf-8", newline="") as file:
+            reader = csv.DictReader(file)
 
-        for count, row in enumerate(reader, start=1):
-            encounter_id = row["encounter_id"]
+            for row in reader:
+                encounter_id = row["encounter_id"]
 
-            future = producer.send(
-                TOPIC,
-                key=encounter_id,
-                value=row,
-            )
+                producer.send(
+                    TOPIC,
+                    key=encounter_id,
+                    value=row,
+                )
 
-            metadata = future.get(timeout=30)
+                sent += 1
 
-            print(
-                f"Sent record {count}: "
-                f"encounter_id={encounter_id}, "
-                f"partition={metadata.partition}, "
-                f"offset={metadata.offset}"
-            )
+                if sent % PROGRESS_EVERY == 0:
+                    producer.flush()
+                    print(f"Sent {sent} records")
 
-            if count >= TEST_RECORDS:
-                break
+                if RECORD_LIMIT is not None and sent >= RECORD_LIMIT:
+                    break
 
-    producer.flush()
-    producer.close()
+        producer.flush()
 
-    print("Producer test complete.")
+    finally:
+        producer.close()
+
+    print(f"Producer complete. Total records sent: {sent}")
 
 
 if __name__ == "__main__":
