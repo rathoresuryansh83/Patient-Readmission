@@ -16,3 +16,6 @@ kafka-data/
 Thumbs.db
 .vscode/
 .idea/
+
+# Generated ML artifacts
+data/ml/
