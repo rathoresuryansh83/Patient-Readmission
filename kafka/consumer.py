@@ -7,12 +7,12 @@ from kafka import KafkaConsumer
 
 KAFKA_SERVER = "localhost:9092"
 TOPIC = "patient-discharge"
-GROUP_ID = "patient-consumer-hdfs-100-test"
-RECORD_LIMIT = 100
+GROUP_ID = "patient-consumer-hdfs-full"
+RECORD_LIMIT = None
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-LOCAL_OUTPUT = BASE_DIR / "data" / "patient-discharge-100.jsonl"
-HDFS_OUTPUT = "/patient-readmission/raw/patient-discharge-100.jsonl"
+LOCAL_OUTPUT = BASE_DIR / "data" / "patient-discharge-full.jsonl"
+HDFS_OUTPUT = "/patient-readmission/raw/patient-discharge-full.jsonl"
 
 
 def main():
@@ -50,7 +50,7 @@ def main():
                 if received % 100 == 0:
                     print(f"Received {received} records")
 
-                if received >= RECORD_LIMIT:
+                if RECORD_LIMIT is not None and received >= RECORD_LIMIT:
                     break
     finally:
         consumer.close()
