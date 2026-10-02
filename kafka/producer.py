@@ -12,7 +12,7 @@ KAFKA_SERVER = "localhost:9092"
 TOPIC = "patient-discharge"
 
 # Set to None to send the complete dataset.
-RECORD_LIMIT = 100
+RECORD_LIMIT = None
 
 PROGRESS_EVERY = 100
 
