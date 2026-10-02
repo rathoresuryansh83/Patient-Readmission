@@ -5,7 +5,8 @@ from kafka import KafkaConsumer
 
 KAFKA_SERVER = "localhost:9092"
 TOPIC = "patient-discharge"
-GROUP_ID = "patient-consumer-test"
+GROUP_ID = "patient-consumer-100-test"
+RECORD_LIMIT = 100
 
 
 def main():
@@ -20,6 +21,8 @@ def main():
     )
 
     print(f"Listening to topic '{TOPIC}'...")
+    print(f"Consumer group: {GROUP_ID}")
+    print(f"Record limit: {RECORD_LIMIT}")
     print("Waiting for Kafka records...")
 
     received = 0
@@ -37,12 +40,12 @@ def main():
         print(f"encounter_id={message.value.get('encounter_id')}")
         print(f"patient_id={message.value.get('patient_id')}")
 
-        if received >= 5:
+        if received >= RECORD_LIMIT:
             break
 
     consumer.close()
 
-    print("Consumer test complete.")
+    print(f"Consumer test complete. Total records received: {received}")
 
 
 if __name__ == "__main__":
