@@ -59,7 +59,7 @@ def main():
 
     subprocess.run(
         [
-            "C:\hadoop\bin\hdfs.cmd",
+            r"C:\hadoop\bin\hdfs.cmd",
             "dfs",
             "-put",
             "-f",
@@ -75,3 +75,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
