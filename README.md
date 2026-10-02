@@ -53,3 +53,25 @@ Diabetes 130-US Hospitals Dataset
                 |
                 v
        Dashboard Interface
+## Machine Learning and Prediction
+
+The ML pipeline now includes preprocessing, Logistic Regression training, test-set prediction generation, and readmission probability output.
+
+- Training rows: 81,412
+- Testing rows: 20,354
+- Transformed features: 2,370
+- Accuracy: 0.6423
+- Precision: 0.1660
+- Recall: 0.5482
+- F1-score: 0.2548
+- ROC-AUC: 0.6441
+
+Prediction output is stored locally at `data/ml/predictions.csv` and verified in HDFS at:
+
+```text
+/patient-readmission/predictions/predictions.csv
+```
+
+The HDFS prediction file contains 20,354 prediction records plus one header row. Each record contains the actual 30-day readmission label, predicted label, and readmission probability.
+
+The prediction generation script is located at `ml/predict.py`.
