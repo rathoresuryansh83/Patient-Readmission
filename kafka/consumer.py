@@ -1,12 +1,18 @@
 import json
+import subprocess
+from pathlib import Path
 
 from kafka import KafkaConsumer
 
 
 KAFKA_SERVER = "localhost:9092"
 TOPIC = "patient-discharge"
-GROUP_ID = "patient-consumer-100-test"
+GROUP_ID = "patient-consumer-hdfs-100-test"
 RECORD_LIMIT = 100
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+LOCAL_OUTPUT = BASE_DIR / "data" / "patient-discharge-100.jsonl"
+HDFS_OUTPUT = "/patient-readmission/raw/patient-discharge-100.jsonl"
 
 
 def main():
@@ -23,29 +29,48 @@ def main():
     print(f"Listening to topic '{TOPIC}'...")
     print(f"Consumer group: {GROUP_ID}")
     print(f"Record limit: {RECORD_LIMIT}")
-    print("Waiting for Kafka records...")
+    print(f"Local output: {LOCAL_OUTPUT}")
+    print(f"HDFS output: {HDFS_OUTPUT}")
 
     received = 0
 
-    for message in consumer:
-        received += 1
+    try:
+        with LOCAL_OUTPUT.open("w", encoding="utf-8") as output_file:
+            for message in consumer:
+                record = {
+                    "kafka_key": message.key,
+                    "partition": message.partition,
+                    "offset": message.offset,
+                    "data": message.value,
+                }
 
-        print(
-            f"Received record {received}: "
-            f"key={message.key}, "
-            f"partition={message.partition}, "
-            f"offset={message.offset}"
-        )
+                output_file.write(json.dumps(record) + "\n")
+                received += 1
 
-        print(f"encounter_id={message.value.get('encounter_id')}")
-        print(f"patient_id={message.value.get('patient_id')}")
+                if received % 100 == 0:
+                    print(f"Received {received} records")
 
-        if received >= RECORD_LIMIT:
-            break
+                if received >= RECORD_LIMIT:
+                    break
+    finally:
+        consumer.close()
 
-    consumer.close()
+    print(f"Kafka consumption complete. Total records received: {received}")
 
-    print(f"Consumer test complete. Total records received: {received}")
+    subprocess.run(
+        [
+            "C:\hadoop\bin\hdfs.cmd",
+            "dfs",
+            "-put",
+            "-f",
+            str(LOCAL_OUTPUT),
+            HDFS_OUTPUT,
+        ],
+        check=True,
+    )
+
+    print(f"Uploaded {LOCAL_OUTPUT.name} to HDFS.")
+    print(f"HDFS output: {HDFS_OUTPUT}")
 
 
 if __name__ == "__main__":
