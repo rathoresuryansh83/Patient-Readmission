@@ -113,6 +113,14 @@ def main():
     print(f"Training rows: {len(X_train)}")
     print(f"Testing rows: {len(X_test)}")
 
+    # Save patient IDs for the exact test rows so predictions can be traced back to patients.
+    test_patient_ids = df.loc[X_test.index, "patient_id"].astype("int64")
+    test_patient_ids.to_csv(
+        OUTPUT_DIR / "test_patient_ids.csv",
+        index=False,
+    )
+    print(f"Saved test patient IDs: {len(test_patient_ids)}")
+   
     # Fit preprocessing only on training data.
     X_train_transformed = preprocessor.fit_transform(X_train)
     X_test_transformed = preprocessor.transform(X_test)

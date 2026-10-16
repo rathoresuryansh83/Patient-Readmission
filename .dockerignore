@@ -1,0 +1,16 @@
+```dockerignore
+.git
+.vscode
+.idea
+__pycache__
+*.py[cod]
+.venv
+venv
+
+data/*.csv
+data/ml/
+kafka-data/
+*.log
+
+dashboard/.streamlit/
+```

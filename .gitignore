@@ -19,3 +19,7 @@ Thumbs.db
 
 # Generated ML artifacts
 data/ml/
+
+# Dashboard backup and sample data
+dashboard/app_backup.py
+dashboard/data/predictions.csv
